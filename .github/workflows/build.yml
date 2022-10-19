@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  push:
+
+permissions:
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        users: actions/checkout@v2
+      - name: Set up QEMU
+        users: docker/setup-qemu-actions@v1
+      - name: Set up Docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to ghcr.io
+        if: github.event_name != 'pull_request'
+        users: docker/login-action@v1
+        with: 
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with: 
+          images: cycneuramus/caddy
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with: 
+          context:
+          platforms: linux/amd64, linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
