@@ -1,4 +1,4 @@
-FROM caddy:builder AS builder
+FROM caddy:2.7.6-builder AS builder
 
 ENV GOARCH $TARGETARCH
 
@@ -9,5 +9,5 @@ RUN xcaddy build \
 	--with github.com/mholt/caddy-l4 \
 	--with github.com/sagikazarmark/caddy-fs-s3
 
-FROM caddy:latest
+FROM caddy:2.7.6
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
